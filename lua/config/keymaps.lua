@@ -4,8 +4,7 @@
 vim.keymap.set("n", "<C-d>", "<C-d>zz")
 vim.keymap.set("n", "<C-u>", "<C-u>zz")
 
-vim.keymap.set("n", "<leader>nn", "o<ESC>")
-vim.keymap.set("n", "<leader>NN", "O<ESC>")
-vim.keymap.set("n", "<leader>nN", "O<ESC>")
-
-vim.keymap.set("n", "<leader>nd", "yitvatp")
+vim.keymap.set("n", "<leader>n", function()
+  print("Remove a tag: dst")
+  print("Create a surround tag: csbt")
+end)
