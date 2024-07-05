@@ -4,7 +4,22 @@
 vim.keymap.set("n", "<C-d>", "<C-d>zz")
 vim.keymap.set("n", "<C-u>", "<C-u>zz")
 
-vim.keymap.set("n", "<leader>n", function()
-  print("Remove a tag: dst")
-  print("Create a surround tag: csbt")
+vim.keymap.set("n", "dd", function()
+  local fileExtension = vim.fn.expand("%:e")
+  if fileExtension == "tsx" or fileExtension == "jsx" then
+    local currentLine = vim.api.nvim_get_current_line()
+    local firstNonWhiteSpaceCharacter = string.sub(string.gsub(currentLine, "%s+", ""), 1, 1)
+
+    if firstNonWhiteSpaceCharacter == "<" then
+      vim.api.nvim_feedkeys(
+        vim.api.nvim_replace_termcodes("<Plug>(nvim-surround-delete)t", true, true, true),
+        "n",
+        true
+      )
+    else
+      vim.cmd("normal! dd")
+    end
+  else
+    vim.cmd("normal! dd")
+  end
 end)
