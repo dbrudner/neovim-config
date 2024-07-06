@@ -23,3 +23,40 @@ vim.keymap.set("n", "dd", function()
     vim.cmd("normal! dd")
   end
 end)
+
+local function wrap_try_catch()
+  -- Get the range of the selected lines
+  local start_line = vim.fn.getpos("'<")[2]
+  local end_line = vim.fn.getpos("'>")[2]
+
+  -- Get the selected lines
+  local lines = vim.fn.getline(start_line, end_line)
+
+  -- Ensure lines is always an array
+  if type(lines) == "string" then
+    lines = { lines }
+  end
+
+  -- Add indentation to the selected lines
+  for i, line in ipairs(lines) do
+    lines[i] = "    " .. line
+  end
+
+  -- Insert try/catch block
+  table.insert(lines, 1, "try {")
+  table.insert(lines, "}")
+  table.insert(lines, "catch (e) {")
+  table.insert(lines, "    ")
+  table.insert(lines, "}")
+
+  -- Set the modified lines back to the buffer
+  vim.fn.setline(start_line, lines)
+
+  -- Move the cursor to the line inside the catch block
+  vim.api.nvim_win_set_cursor(0, { start_line + #lines - 2, 4 })
+end
+
+-- Key mapping to wrap highlighted code in try/catch
+vim.keymap.set("v", "<Leader>tc", function()
+  wrap_try_catch()
+end, { noremap = true, silent = true })
