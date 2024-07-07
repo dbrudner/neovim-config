@@ -8,9 +8,11 @@ vim.keymap.set("n", "dd", function()
   local fileExtension = vim.fn.expand("%:e")
   if fileExtension == "tsx" or fileExtension == "jsx" then
     local currentLine = vim.api.nvim_get_current_line()
-    local firstNonWhiteSpaceCharacter = string.sub(string.gsub(currentLine, "%s+", ""), 1, 1)
+    local trimmedLine = string.gsub(currentLine, "^%s+", "")
+    local firstCharacter = string.sub(trimmedLine, 1, 1)
+    local secondCharacter = string.sub(trimmedLine, 2, 2)
 
-    if firstNonWhiteSpaceCharacter == "<" then
+    if firstCharacter == "<" and secondCharacter ~= "/" then
       vim.api.nvim_feedkeys(
         vim.api.nvim_replace_termcodes("<Plug>(nvim-surround-delete)t", true, true, true),
         "n",
