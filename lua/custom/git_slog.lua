@@ -15,21 +15,25 @@ end
 
 -- Function to get the list of branches from git reflog
 local function get_git_branches()
-  local output = get_command_output("git reflog --pretty='%gs' | awk '{print $NF}' | grep -v '^$' | sort | uniq")
+  local command =
+    [[git reflog --pretty='%gs' | grep 'checkout: moving from ' | sed -E 's/checkout: moving from (.*) to (.*)/\2/' | grep -vE 'HEAD~?[0-9]*|^refs/heads/|^[0-9a-f]{7,40}$' | sort | uniq]]
+  local handle = io.popen(command)
+  local result = handle:read("*a")
+  handle:close()
   local branches = {}
-  for branch in output:gmatch("[^\r\n]+") do
+  for branch in result:gmatch("[^\r\n]+") do
     table.insert(branches, branch)
   end
   return branches
 end
 
 -- Telescope picker for git branches
-function _G.git_branch_picker()
+function _G.git_slog()
   local branches = get_git_branches()
 
   pickers
     .new({}, {
-      prompt_title = "Git Branches",
+      prompt_title = "Git Slog",
       finder = finders.new_table({
         results = branches,
       }),
@@ -47,7 +51,6 @@ function _G.git_branch_picker()
 
         map("i", "<CR>", on_select)
         map("n", "<CR>", on_select)
-
         return true
       end,
     })
@@ -55,4 +58,4 @@ function _G.git_branch_picker()
 end
 
 -- Command to invoke the custom picker
-vim.api.nvim_set_keymap("n", "<leader>ng", "<cmd>lua git_branch_picker()<CR>", { noremap = true, silent = true })
+vim.api.nvim_set_keymap("n", "<leader>ng", "<cmd>lua git_slog()<CR>", { noremap = true, silent = true })
