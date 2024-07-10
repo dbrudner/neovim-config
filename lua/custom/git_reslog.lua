@@ -19,7 +19,7 @@ local git_log_previewer = function(opts)
       -- Clearing the buffer
       vim.api.nvim_buf_set_lines(self.state.bufnr, 0, -1, false, {})
       -- Fetching git log for the branch with a shorter commit hash
-      local command = "git log --pretty=format:'%h %s' -n 10 " .. entry.value
+      local command = "git log --pretty=format:'- %s %h' -n 10 " .. entry.value
       local handle = io.popen(command, "r")
       if handle then
         local results = {}
@@ -70,10 +70,10 @@ function _G.git_reslog()
       layout_strategy = "flex",
       layout_config = {
         horizontal = {
-          preview_width = 0.6,
+          preview_width = 0.4,
         },
         vertical = {
-          preview_height = 0.5,
+          preview_height = 0.4,
         },
         flex = {
           flip_columns = 120,
