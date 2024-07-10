@@ -16,15 +16,22 @@ end
 -- Function to get the list of branches from git reflog
 local function get_git_branches()
   local command =
-    [[git reflog --pretty='%gs' | grep 'checkout: moving from ' | sed -E 's/checkout: moving from (.*) to (.*)/\2/' | grep -vE 'HEAD~?[0-9]*|^refs/heads/|^[0-9a-f]{7,40}$' | sort | uniq]]
+    [[git reflog --date=iso --pretty='%gd: %gs' | grep 'checkout: moving from ' | sed -E 's/.*checkout: moving from (.*) to (.*)/\2/' | grep -vE 'HEAD~?[0-9]*|^refs/heads/|^[0-9a-f]{7,40}$' | nl | sort -uk2,2 | sort -nr | cut -f2-]]
   local handle = io.popen(command)
   local result = handle:read("*a")
   handle:close()
+
   local branches = {}
   for branch in result:gmatch("[^\r\n]+") do
     table.insert(branches, branch)
   end
-  return branches
+
+  local reversed_branches = {}
+  for i = #branches, 1, -1 do
+    table.insert(reversed_branches, branches[i])
+  end
+
+  return reversed_branches
 end
 
 -- Telescope picker for git branches
