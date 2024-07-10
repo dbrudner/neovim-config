@@ -5,12 +5,33 @@ local pickers = require("telescope.pickers")
 local finders = require("telescope.finders")
 local conf = require("telescope.config").values
 
--- Function to run shell commands and capture the output
-local function get_command_output(command)
-  local handle = io.popen(command)
-  local result = handle:read("*a")
-  handle:close()
-  return result
+local previewers = require("telescope.previewers")
+local Previewer = previewers.new_buffer_previewer
+
+-- Creating a custom previewer for the git log
+local git_log_previewer = function(opts)
+  return Previewer({
+    title = "Git Log",
+    define_preview = function(self, entry, status)
+      if not entry.value then
+        return
+      end
+      -- Clearing the buffer
+      vim.api.nvim_buf_set_lines(self.state.bufnr, 0, -1, false, {})
+      -- Fetching git log for the branch with a shorter commit hash
+      local command = "git log --pretty=format:'%h %s' -n 10 " .. entry.value
+      local handle = io.popen(command, "r")
+      if handle then
+        local results = {}
+        for line in handle:lines() do
+          table.insert(results, line)
+        end
+        handle:close()
+        -- Set the lines to the buffer
+        vim.api.nvim_buf_set_lines(self.state.bufnr, 0, -1, false, results)
+      end
+    end,
+  })
 end
 
 -- Function to get the list of branches from git reflog
@@ -35,23 +56,36 @@ local function get_git_branches()
 end
 
 -- Telescope picker for git branches
-function _G.git_slog()
+function _G.git_reslog()
   local branches = get_git_branches()
 
   pickers
     .new({}, {
-      prompt_title = "Git Slog",
+      prompt_title = "Git ReSlog",
       finder = finders.new_table({
         results = branches,
       }),
       sorter = conf.generic_sorter({}),
+      previewer = git_log_previewer(),
+      layout_strategy = "flex",
+      layout_config = {
+        horizontal = {
+          preview_width = 0.6,
+        },
+        vertical = {
+          preview_height = 0.5,
+        },
+        flex = {
+          flip_columns = 120,
+        },
+      },
       attach_mappings = function(prompt_bufnr, map)
         local function on_select()
           local selected_branch = action_state.get_selected_entry().value
           actions.close(prompt_bufnr)
           -- Commit changes with a generic message if there are any
           os.execute("git add .")
-          os.execute("git commit -m 'Auto commit before branch switch'")
+          os.execute("HUSKY=0 git commit -m 'Auto commit before branch switch'")
           -- Switch to the selected branch
           os.execute("git checkout " .. selected_branch)
         end
@@ -65,4 +99,4 @@ function _G.git_slog()
 end
 
 -- Command to invoke the custom picker
-vim.api.nvim_set_keymap("n", "<leader>ng", "<cmd>lua git_slog()<CR>", { noremap = true, silent = true })
+vim.api.nvim_set_keymap("n", "<leader>gr", "<cmd>lua git_reslog()<CR>", { noremap = true, silent = true })
