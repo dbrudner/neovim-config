@@ -2,3 +2,4 @@
 require("config.lazy")
 require("custom.git_scommit")
 require("custom.git_reslog")
+require("custom.spotify")

@@ -4,61 +4,18 @@
 vim.keymap.set("n", "<C-d>", "<C-d>zz")
 vim.keymap.set("n", "<C-u>", "<C-u>zz")
 
-vim.keymap.set("n", "dd", function()
-  local fileExtension = vim.fn.expand("%:e")
-  if fileExtension == "tsx" or fileExtension == "jsx" then
-    local currentLine = vim.api.nvim_get_current_line()
-    local trimmedLine = string.gsub(currentLine, "^%s+", "")
-    local firstCharacter = string.sub(trimmedLine, 1, 1)
-    local secondCharacter = string.sub(trimmedLine, 2, 2)
+-- Set global marks with Ctrl + 1 through Ctrl + 6
+vim.api.nvim_set_keymap("n", "<C-1>", "mA", { noremap = true, silent = true })
+vim.api.nvim_set_keymap("n", "<C-2>", "mB", { noremap = true, silent = true })
+vim.api.nvim_set_keymap("n", "<C-3>", "mC", { noremap = true, silent = true })
+vim.api.nvim_set_keymap("n", "<C-4>", "mD", { noremap = true, silent = true })
+vim.api.nvim_set_keymap("n", "<C-5>", "mE", { noremap = true, silent = true })
+vim.api.nvim_set_keymap("n", "<C-6>", "mF", { noremap = true, silent = true })
 
-    if firstCharacter == "<" and secondCharacter ~= "/" then
-      vim.api.nvim_feedkeys(
-        vim.api.nvim_replace_termcodes("<Plug>(nvim-surround-delete)t", true, true, true),
-        "n",
-        true
-      )
-    else
-      vim.cmd("normal! dd")
-    end
-  else
-    vim.cmd("normal! dd")
-  end
-end)
-
-local function wrap_try_catch()
-  -- Get the range of the selected lines
-  local start_line = vim.fn.getpos("'<")[2]
-  local end_line = vim.fn.getpos("'>")[2]
-
-  -- Get the selected lines
-  local lines = vim.fn.getline(start_line, end_line)
-
-  -- Ensure lines is always an array
-  if type(lines) == "string" then
-    lines = { lines }
-  end
-
-  -- Add indentation to the selected lines
-  for i, line in ipairs(lines) do
-    lines[i] = "    " .. line
-  end
-
-  -- Insert try/catch block
-  table.insert(lines, 1, "try {")
-  table.insert(lines, "}")
-  table.insert(lines, "catch (e) {")
-  table.insert(lines, "    ")
-  table.insert(lines, "}")
-
-  -- Set the modified lines back to the buffer
-  vim.fn.setline(start_line, lines)
-
-  -- Move the cursor to the line inside the catch block
-  vim.api.nvim_win_set_cursor(0, { start_line + #lines - 2, 4 })
-end
-
--- Key mapping to wrap highlighted code in try/catch
-vim.keymap.set("v", "<Leader>tc", function()
-  wrap_try_catch()
-end, { noremap = true, silent = true })
+-- Jump to marks with 1 through 6
+vim.api.nvim_set_keymap("n", "1", "'A", { noremap = true, silent = true })
+vim.api.nvim_set_keymap("n", "2", "'B", { noremap = true, silent = true })
+vim.api.nvim_set_keymap("n", "3", "'C", { noremap = true, silent = true })
+vim.api.nvim_set_keymap("n", "4", "'D", { noremap = true, silent = true })
+vim.api.nvim_set_keymap("n", "5", "'E", { noremap = true, silent = true })
+vim.api.nvim_set_keymap("n", "6", "'F", { noremap = true, silent = true })
