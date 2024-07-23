@@ -7,7 +7,15 @@ return {
     require("cyberdream").setup({
       transparent = true,
     })
-
-    vim.cmd("colorscheme cyberdream")
   end,
+  {
+    "tokyonight.nvim",
+    opts = {
+      transparent = true,
+      styles = {
+        sidebars = "transparent",
+        floats = "transparent",
+      },
+    },
+  },
 }
